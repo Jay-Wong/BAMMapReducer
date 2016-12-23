@@ -41,13 +41,13 @@ public:
     static KVDatabase* GetInstance();
     void Print();
 
-    time_t ciMaxValidSec;
-
 private:
     KVDatabase();
-    static KVDatabase* cpoInstance;
-    map<string, DataElem> KVList;
+    static  KVDatabase* cpoInstance;
+    time_t  ciMaxValidSec;
     CRWLock coRWLock;
+    map<string, DataElem> KVList;
+
     class CCollector
     {
     public:
@@ -59,5 +59,16 @@ private:
     };
     static CCollector coCollector;
 };
+
+
+/**
+ * @brief Trans string to int
+ */
+int    StrToInt(const char* apcBuff, int size);
+
+/**
+ * @brief Trans int to string
+ */
+string IntToStr(int aiNum);
 
 #endif

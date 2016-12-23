@@ -7,8 +7,28 @@ KVDatabase::KVDatabase() {}
 
 int KVDatabase::Init()
 {
-    ciMaxValidSec = DAY_SEC;
-    return 0;
+    char   lacGoal[32]  = {0};
+    char   lacBuff[128] = {0};
+    string lsSubstr;
+    ifstream fin("../config/config.ini");
+    while (fin.getline(lacBuff, sizeof(lacBuff)))
+    {
+        for (int i = 0; i < strlen(lacBuff); ++i)
+        {
+            if ('\r' == lacBuff[i] || '\n' == lacBuff[i])
+            {
+                lacBuff[i] = 0;
+            }
+        }
+        lsSubstr = string(lacBuff);
+        if (lsSubstr.find("IndexValidSecond") == 0)
+        {
+            memcpy(lacGoal, lacBuff+17, strlen(lacBuff)-17);
+            ciMaxValidSec = StrToInt(lacGoal, strlen(lacGoal));
+            return 0;
+        }
+    }
+    return -1;
 }
 
 KVDatabase* KVDatabase::GetInstance()
@@ -49,13 +69,14 @@ int KVDatabase::Get(Pair* apoPair)
 
 int KVDatabase::Delete(Pair* apoPair)
 {
-    coRWLock.WLock();
     map<string, DataElem>::iterator loItr = KVList.begin();
     while (loItr != KVList.end())
     {
         if (strcmp(loItr->first.c_str(), apoPair->csDestFileName) == 0)
         {
+            coRWLock.WLock();
             KVList.erase(loItr++);
+            coRWLock.Unlock();
             return 0;
         }
         else
@@ -63,7 +84,6 @@ int KVDatabase::Delete(Pair* apoPair)
             ++loItr;
         }
     }
-    coRWLock.Unlock();
     return -1;
 }
 
@@ -109,4 +129,33 @@ void KVDatabase::Print()
         sprintf(lacLogInfo, "key: %s, value: %s", itr->first.c_str(), itr->second.csDatetime);
         ++itr;
     }
+}
+
+//////////////////////////////////////////
+
+int StrToInt(const char* apcBuff, int size)
+{
+    int liRet = 0;
+    for (int i = 0; i < size; ++i)
+    {
+        liRet = liRet * 10 + (int)(apcBuff[i] - '0');
+    }
+    return liRet;
+}
+
+string IntToStr(int aiNum)
+{
+    string lsRet;
+    if (0 == aiNum)
+    {
+        return "0";
+    }
+    
+    while (aiNum)
+    {
+        lsRet = (char)(aiNum%10 + '0') + lsRet;
+        aiNum /= 10;
+    }
+    
+    return lsRet;
 }

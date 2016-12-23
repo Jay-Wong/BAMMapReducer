@@ -15,8 +15,9 @@ void* KVDBEntry(void*)
 void* MapperEntry(void*)
 {
     sleep(1);
-    CMapper mapper;
-    mapper.HandleStatEntry();
+    CMapper loMapper;
+    loMapper.Init();
+    loMapper.HandleStatEntry();
     return NULL;
 }
 
@@ -27,12 +28,14 @@ void* ReducerEntry(void* apvParam)
      * so wait Mapper load some data.
      */
     sleep(2);
+    ((Reducer*)apvParam)->Init();
     ((Reducer*)apvParam)->ReduceMapEntry();
     return NULL;
 }
 
 void* RequeryEntry(void* apvParam)
 {
+    sleep(3);
     ((Reducer*)apvParam)->Requery();
     return NULL;
 }
